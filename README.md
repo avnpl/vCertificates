@@ -2,7 +2,9 @@
 
 ## Getting Started
 
-- Create a folder, Open command prompt inside it and run `git clone https://github.com/avnpl/vCertificates.git`
+- Create a folder, Open command prompt inside it and run
+
+  `git clone https://github.com/avnpl/vCertificates.git`
 
 - Run the following
 
