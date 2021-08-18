@@ -2,6 +2,7 @@ var express = require("express");
 var app = express();
 var httpObj = require("http");
 var http = httpObj.createServer(app);
+const fs = require('fs');
 
 
 var mainURL = "http://localhost:3000";
@@ -9,8 +10,9 @@ var mainURL = "http://localhost:3000";
 // const {ObjectId}  = require('mongodb');
 
 const MongoClient = require('mongodb').MongoClient;
+var ObjectId = require('mongodb').ObjectId;
 const uri = "mongodb+srv://inShare:TABLE1234@cluster0.u8thi.mongodb.net/inshare?retryWrites=true&w=majority";
-// const uri ="mongodb+srv://cluster0.u8thi.mongodb.net/inshare" 
+// const uri ="mongodb+srv://cluster0.u8thi.mongodb.net/inshare"
 
 app.set("view engine", "ejs");
 
@@ -46,14 +48,16 @@ var nodemailerObject = {
     port: 465,
     secure: true,
     auth: {
-        user: "2322rohini@gmail.com",
-        pass: ""
+        user: "dandekar.anushree3@gmail.com",
+        pass: "tubelight"
     }
 };
 
 var fileSystem = require("fs");
 
-// recursive function to get the folder from uploaded 
+var rimraf = require("rimraf");
+
+// recursive function to get the folder from uploaded
 function recursiveGetFolder (files, _id) {
     var singleFile = null;
     for (var a=0; a<files.length; a++) {
@@ -93,10 +97,60 @@ function getUpdatedArray (arr, _id, uploadedObj) {
                 arr[a]._id = ObjectId(arr[a]._id);
                 getUpdatedArray(arr[a].files, _id, uploadedObj);
             }
-        } 
+        }
     }
 
     return arr;
+}
+
+//recursive function to remove the file and return the updates updatedArray
+
+function removeFileReturnUpdated(arr, _id){
+  for (var a=0; a< arr.length; a++){
+    if(arr[a].type != "folder" && arr[a]._id == _id){
+      //remove the uploads folder
+      try{
+        fileSystem.unlinkSync(arr[a].filePath);
+      }catch(exp){
+        //
+
+      }
+      // remove the file from array
+      arr.splice(a,1);
+      break;
+    }
+// do the recursion if it has sub-folders
+    if (arr[a].type == "folder" && arr[a].files.length > 0){
+      arr[a]._id = ObjectId(arr[a]._id);
+      removeFileReturnUpdated(arr[a].files,_id);
+    }
+  }
+  return arr;
+}
+
+//recursive function to remove the folder and return the updates updatedArray
+
+function removeFolderReturnUpdated(arr,_id){
+  console.log("calledremove")
+  for (var a=0; a< arr.length; a++){
+    if(arr[a].type == "folder"){
+      if (arr[a]._id == _id){
+        //remove the folder with all sub-directories in it
+        rimraf(arr[a].folderPath,function(){
+          console.log("done")
+        });
+        arr.splice(a,1);
+        break;
+    }
+    if (arr[a].files.length > 0){
+      arr[a]._id = ObjectId(arr[a]._id);
+      removeFolderReturnUpdated(arr[a].files,_id);
+    }
+    }
+
+  }
+  console.log("removefunctionOver")
+  return arr;
 }
 
 http.listen(3000, function(){
@@ -106,10 +160,74 @@ http.listen(3000, function(){
     mongo.connect(err => {
     console.log("Connected to MongoDB server...");
 
+    app.post("/DeleteDirectory", async function(request,result){
+
+console.log("calllllled");
+
+      const _id = request.fields._id;
+
+      if(request.session.user){
+        var user = await mongo.db("inshare").collection("users").findOne({
+          "_id": ObjectId(request.session.user._id)
+        });
+
+        var updatedArray= await removeFolderReturnUpdated(user.uploaded, _id);
+        for(var a = 0; a < updatedArray.length; a++){
+          updatedArray[a]._id = ObjectId(updatedArray[a]._id);
+        }
+
+        await mongo.db("inshare").collection("users").updateOne({
+          "_id": ObjectId(request.session.user._id)
+        },{
+          $set: {
+            "uploaded": updatedArray
+          }
+        });
+console.log("Almost end");
+        const backURL = request.header('Referer') || '/';
+        result.redirect(backURL);
+        return false;
+      }
+console.log("about to call login");
+      result.redirect("/Login");
+
+    });
+
+    app.post("/DeleteFile", async function(request ,result){
+
+      const _id = request.fields._id;
+
+      if(request.session.user){
+        var user = await mongo.db("inshare").collection("users").findOne({
+          "_id": ObjectId(request.session.user._id)
+        });
+
+        var updatedArray= await removeFileReturnUpdated(user.uploaded, _id);
+        for(var a = 0; a < updatedArray.length; a++){
+          updatedArray[a]._id = ObjectId(updatedArray[a]._id);
+        }
+
+        await mongo.db("inshare").collection("users").updateOne({
+          "_id": ObjectId(request.session.user._id)
+        },{
+          $set: {
+            "uploaded": updatedArray
+          }
+        });
+
+
+
+      const backURL = request.header('Referer') || '/';
+      result.redirect(backURL);
+      return false;
+      }
+      result.redirect("/Login");
+    });
+
     app.post("/UploadFile", async function(request, result) {
         if(request.session.user) {
             const {ObjectId}  = require('mongodb');
-            var user = await mongo.db("inshare").collection("users").findOne({ 
+            var user = await mongo.db("inshare").collection("users").findOne({
                 "_id": ObjectId(request.session.user._id)
             });
 
@@ -124,12 +242,12 @@ http.listen(3000, function(){
                     "type": request.files.file.type,
                     "filePath": "",
                     "createdAt":new Date().getTime()
-    
+
                 };
 
                 var filePath = "";
 
-                //if it is the root path 
+                //if it is the root path
                 if(_id == "") {
                     filePath = "public/uploads/" + user.email + "/" + new Date().getTime() + "-" + request.files.file.name;
                 uploadedObj.filePath = filePath;
@@ -163,7 +281,7 @@ http.listen(3000, function(){
                     });
                 });
                 } else {
-                   // if it is a folder 
+                   // if it is a folder
 
                    var folderObj = await recursiveGetFolder(user.uploaded, _id);
 
@@ -204,7 +322,7 @@ http.listen(3000, function(){
                    });
                 }
 
-                
+
 
 
             } else {
@@ -224,8 +342,8 @@ http.listen(3000, function(){
 
         const name = request.fields.name;
         const _id = request.fields._id;
-        
-        
+
+
 
         if(request.session.user) {
 
@@ -254,7 +372,7 @@ http.listen(3000, function(){
                 if(!fileSystem.existsSync("public/uploads/" + user.email)) {
                     fileSystem.mkdirSync("public/uploads/" + user.email);
                 }
-            } 
+            }
             else {
                 var folderObj = await recursiveGetFolder(user.uploaded, _id);
                 uploadedObj.folderPath = folderObj.folderPath + "/" + name;
@@ -302,13 +420,15 @@ http.listen(3000, function(){
             result.redirect("/MyUploads/" + _id);
             return false;
         }
-        
+
         result.redirect("/Login");
     })
 
+
+
     app.get("/MyUploads/:_id?", async function(request, result) {
-        
-        
+
+
         const _id = request.params._id;
         if(request.session.user) {
 
@@ -363,6 +483,8 @@ http.listen(3000, function(){
         result.redirect("/Login");
     });
 
+
+
     app.get("/", function(request, result){
         result.render("index", {
             "request": request
@@ -385,8 +507,8 @@ http.listen(3000, function(){
         var verification_token = new Date().getTime();
 
         var user = await mongo.db("inshare").collection("users").findOne(
-            { "email": email  
-        
+            { "email": email
+
         });
         console.log(user)
 
@@ -489,7 +611,7 @@ http.listen(3000, function(){
             "request": request
         });
     });
-    
+
     app.post("/Login", async function(request, result){
         var email = request.fields.email;
         var password = request.fields.password;
@@ -544,14 +666,14 @@ http.listen(3000, function(){
             var user = await mongo.db("inshare").collection("users").findOne({
                 "email": email
             });
-    
+
             if(user == null) {
                 request.status = "error";
                 request.message = "Email does not exist.";
                 result.render("ForgotPassword", {
                     "request": request
                 });
-    
+
                 return false;
             }
 
@@ -605,14 +727,14 @@ http.listen(3000, function(){
                     "reset_token":parseInt(reset_token)
                 }]
             });
-    
+
             if(user == null) {
                 request.status = "error";
                 request.message = "Link is expires";
                 result.render("Error", {
                     "request": request
                 });
-    
+
                 return false;
             }
 
@@ -628,7 +750,7 @@ http.listen(3000, function(){
             var reset_token = request.fields.reset_token;
             var new_password = request.fields.new_password;
             var confirm_password = request.fields.confirm_password;
-    
+
             if(new_password != confirm_password) {
                 request.status = "error";
                 request.message = "Password does not match";
@@ -637,10 +759,10 @@ http.listen(3000, function(){
                     "email": email,
                     "reset_token":reset_token
                 });
-    
+
                 return false;
             }
-            
+
             var user = await mongo.db("inshare").collection("users").findOne({
                 $and: [{
                     "email": email
@@ -657,7 +779,7 @@ http.listen(3000, function(){
                     "email": email,
                     "reset_token": reset_token
                 });
-    
+
                 return false;
 
             }
@@ -673,7 +795,7 @@ http.listen(3000, function(){
                         "reset_token": "",
                         "password": hash
                     }
-                    
+
             });
 
                 request.status = "success";
@@ -687,32 +809,5 @@ http.listen(3000, function(){
         });
 	});
 
-    
+
 });
-     
-
-    
-// const { MongoClient } = require("mongodb");
-
-
-// // Connection URI
-// const uri =
-//   "mongodb+srv://inShare:ChwwEI2X0oJXAReD@cluster0.u8thi.mongodb.net/inshare?retryWrites=true&w=majority";
-
-// // Create a new MongoClient
-// const client = new MongoClient(uri);
-
-// async function run() {
-//   try {
-//     // Connect the client to the server
-//     await client.connect();
-
-//     // Establish and verify connection
-//     await client.db("inshare").command({ ping: 1 });
-//     console.log("Connected successfully to server");
-//   } finally {
-//     // Ensures that the client will close when you finish/error
-//     await client.close();
-//   }
-// }
-// run().catch(console.dir);
