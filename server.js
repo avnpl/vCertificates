@@ -135,7 +135,7 @@ function removeFileReturnUpdated(arr, _id) {
 //recursive function to remove the folder and return the updates updatedArray
 
 function removeFolderReturnUpdated(arr, _id) {
-  console.log("calledremove");
+  console.log("Called Remove");
   for (var a = 0; a < arr.length; a++) {
     if (arr[a].type == "folder") {
       if (arr[a]._id == _id) {
@@ -152,7 +152,7 @@ function removeFolderReturnUpdated(arr, _id) {
       }
     }
   }
-  console.log("removefunctionOver");
+  console.log("Remove function over");
   return arr;
 }
 
@@ -164,8 +164,6 @@ http.listen(3000, function () {
     console.log("Connected to MongoDB server...");
 
     app.post("/DeleteDirectory", async function (request, result) {
-      console.log("calllllled");
-
       const _id = request.fields._id;
 
       if (request.session.user) {
@@ -611,7 +609,7 @@ http.listen(3000, function () {
 
                     request.status = "success";
                     request.message =
-                      "Signed up successfully. An email has been sent to verify yoyr account.";
+                      "Signed up successfully. An email has been sent to verify your account.";
 
                     result.render("Register", {
                       request: request,
