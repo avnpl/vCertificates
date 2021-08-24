@@ -6,13 +6,10 @@ const fs = require("fs");
 
 var mainURL = "http://localhost:3000";
 
-// const {ObjectId}  = require('mongodb');
-
 const MongoClient = require("mongodb").MongoClient;
 var ObjectId = require("mongodb").ObjectId;
 const uri =
   "mongodb+srv://inShare:TABLE1234@cluster0.u8thi.mongodb.net/inshare?retryWrites=true&w=majority";
-// const uri ="mongodb+srv://cluster0.u8thi.mongodb.net/inshare"
 
 app.set("view engine", "ejs");
 
@@ -109,7 +106,6 @@ function getUpdatedArray(arr, _id, uploadedObj) {
 }
 
 //recursive function to remove the file and return the updates updatedArray
-
 function removeFileReturnUpdated(arr, _id) {
   for (var a = 0; a < arr.length; a++) {
     if (arr[a].type != "folder" && arr[a]._id == _id) {
@@ -133,9 +129,7 @@ function removeFileReturnUpdated(arr, _id) {
 }
 
 //recursive function to remove the folder and return the updates updatedArray
-
 function removeFolderReturnUpdated(arr, _id) {
-  console.log("Called Remove");
   for (var a = 0; a < arr.length; a++) {
     if (arr[a].type == "folder") {
       if (arr[a]._id == _id) {
@@ -152,7 +146,6 @@ function removeFolderReturnUpdated(arr, _id) {
       }
     }
   }
-  console.log("Remove function over");
   return arr;
 }
 
@@ -163,6 +156,7 @@ http.listen(3000, function () {
   mongo.connect((err) => {
     console.log("Connected to MongoDB server...");
 
+    // Route to delete directory
     app.post("/DeleteDirectory", async function (request, result) {
       const _id = request.fields._id;
 
@@ -201,6 +195,7 @@ http.listen(3000, function () {
       result.redirect("/Login");
     });
 
+    // Route to delete file
     app.post("/DeleteFile", async function (request, result) {
       const _id = request.fields._id;
 
@@ -238,6 +233,7 @@ http.listen(3000, function () {
       result.redirect("/Login");
     });
 
+    // Route to upload file
     app.post("/UploadFile", async function (request, result) {
       if (request.session.user) {
         const { ObjectId } = require("mongodb");
@@ -378,6 +374,7 @@ http.listen(3000, function () {
       result.redirect("/Login");
     });
 
+    // Route to create folder
     app.post("/CreateFolder", async function (request, result) {
       const name = request.fields.name;
       const _id = request.fields._id;
@@ -473,6 +470,7 @@ http.listen(3000, function () {
       result.redirect("/Login");
     });
 
+    // What??
     app.get("/MyUploads/:_id?", async function (request, result) {
       const _id = request.params._id;
       if (request.session.user) {
@@ -484,7 +482,6 @@ http.listen(3000, function () {
           .findOne({
             _id: ObjectId(request.session.user._id),
           });
-        // console.log(ObjectId);
 
         var uploaded = null;
         var folderName = "";
@@ -530,18 +527,21 @@ http.listen(3000, function () {
       result.redirect("/Login");
     });
 
+    // What??
     app.get("/", function (request, result) {
       result.render("index", {
         request: request,
       });
     });
 
+    // To get the register page
     app.get("/Register", function (request, result) {
       result.render("Register", {
         request: request,
       });
     });
 
+    // To register
     app.post("/Register", async function (request, result) {
       var name = request.fields.name;
       var email = request.fields.email;
@@ -629,6 +629,7 @@ http.listen(3000, function () {
       }
     });
 
+    // To verify email
     app.get(
       "/verifyEmail/:email/:verification_token",
       async function (request, result) {
@@ -689,12 +690,14 @@ http.listen(3000, function () {
       }
     );
 
+    // To get Login page
     app.get("/Login", function (request, result) {
       result.render("Login", {
         request: request,
       });
     });
 
+    // To login
     app.post("/Login", async function (request, result) {
       var email = request.fields.email;
       var password = request.fields.password;
@@ -738,12 +741,14 @@ http.listen(3000, function () {
       });
     });
 
+    // To get forgot password page
     app.get("/ForgotPassword", function (request, result) {
       result.render("ForgotPassword", {
         request: request,
       });
     });
 
+    // to get recovery link
     app.post("/SendRecoveryLink", async function (request, result) {
       var email = request.fields.email;
       var user = await mongo.db("inshare").collection("users").findOne({
@@ -821,6 +826,7 @@ http.listen(3000, function () {
       );
     });
 
+    // To get reset password page
     app.get(
       "/ResetPassword/:email/:reset_token",
       async function (request, result) {
@@ -859,6 +865,7 @@ http.listen(3000, function () {
       }
     );
 
+    // To reset the password
     app.post("/ResetPassword", async function (request, result) {
       var email = request.fields.email;
       var reset_token = request.fields.reset_token;
