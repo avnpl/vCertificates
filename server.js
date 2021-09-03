@@ -151,9 +151,9 @@ function removeFolderReturnUpdated(arr, _id) {
 
 // recursive function to get the file from uploaded
 function recursiveGetFile ( files, _id) {
-  var sigleFile = null;
+  var singleFile = null;
 
-  for(var a= 0; a < updatedArray.length; a++) {
+  for(var a= 0; a < files.length; a++) {
     const file = files[a];
 
     //return if the file type is not folder and id is found
@@ -163,11 +163,11 @@ function recursiveGetFile ( files, _id) {
       }
     }
 
-    //if it is a folder and have files, then do this recursion
+    //if it is a folder and has files, then do this recursion
     if(file.type == "folder" && file.files.length > 0) {
       singleFile = recursiveGetFile(file.files, _id);
       //return the file if found in sub folders
-      if(singleFile=null) {
+      if(singleFile != null) {
         return singleFile;
       }
     }
@@ -176,12 +176,12 @@ function recursiveGetFile ( files, _id) {
 
 // recursive function to get the shared folder
 function recursiveGetSharedFolder ( files, _id) {
-  var sigleFile = null;
+  var singleFile = null;
 
   for(var a= 0; a < files.length; a++) {
     var file = (typeof files[a].file === "undefined") ? files[a] : files[a].file;
 
-    //return if the file type is not folder and id is found
+    //return if the file type is folder and id is found
     if (file.type == "folder") {
       if(file._id == _id) {
         return file;
@@ -207,7 +207,7 @@ function removeSharedFolderReturnUpdated ( arr, _id) {
   for(var a= 0; a < arr.length; a++) {
     var file = (typeof arr[a].file === "undefined") ? arr[a] : arr[a].file;
 
-    //return if the file type is not folder and id is found
+    
     if (file.type == "folder") {
       if(file._id == _id) {
         arr.splice(a, 1);
@@ -215,7 +215,7 @@ function removeSharedFolderReturnUpdated ( arr, _id) {
        
       }
 
-      //if it has files, then do the recursion
+      //if it has sub folders, then do the recursion
       if(file.files.length > 0 ) {
         file._id = ObjectId(file._id);
         removeSharedFolderReturnUpdated(file.files, _id);
@@ -256,12 +256,84 @@ function removeSharedFileReturnUpdated ( arr, _id) {
   return arr;
 }
 
+// recursive function to get the shared file 
+function recursiveGetSharedFile ( files, _id) {
+  var singleFile = null;
+
+  for(var a= 0; a < files.length; a++) {
+    var file = (typeof files[a].file === "undefined") ? files[a] : files[a].file;
+
+    //return if the file type is not folder and id is found
+    if (file.type != "folder") {
+      if(file._id == _id) {
+        return file;
+      }
+    }
+      //if it is a folder and has files, then do the recursion
+      if(file.type == "folder" && file.files.length > 0 ) {
+        singleFile = recursiveGetSharedFile(file.files, _id);
+        //return the file if found in sub-folders
+        if (singleFile != null) {
+          return singleFile;
+        }
+      }
+  }
+}
+
 http.listen(3000, function () {
   console.log("Server started at " + mainURL);
 
   const mongo = new MongoClient(uri, { useUnifiedTopology: true });
   mongo.connect((err) => {
     console.log("Connected to MongoDB server...");
+
+    //download file
+    app.post("/DownloadFile", async function (request, result) { 
+      const _id = request.fields._id;
+      //console.log("function called");
+
+      if (request.session.user) {
+          var user = await mongo 
+          .db("inshare")
+          .collection("users")
+          .findOne({
+            "_id": ObjectId(request.session.user._id),
+          });
+          
+
+          var fileUploaded = await recursiveGetFile(user.uploaded, _id);
+          //console.log("recursive file called");
+          var fileShared = await recursiveGetSharedFile(user.sharedWithMe, _id);
+          //console.log("recursive shared file called");
+          
+          if (fileUploaded == null && fileShared == null) {
+            result.json({
+              "status": "error",
+              "message": "File is neither uploaded nor shared with you."
+            });
+            return false;
+          }
+
+          var file = (fileUploaded == null) ?  fileShared : fileUploaded;
+
+          fileSystem.readFile(file.filePath, function(error, data) {
+            result.json({
+              "status": "success",
+              "message": "Data has been fetched.",
+              "arrayBuffer": data,
+              "fileType": file.type,
+              "fileName": file.name
+            });
+          });
+
+          return false;
+      }
+      result.json({
+        "status": "error",
+        "message": "Please login to perform this action."
+      }) ;
+      return false; 
+    });
 
     //delete shared file
     app.post("/DeleteSharedFile", async function (request, result) { 
@@ -272,7 +344,7 @@ http.listen(3000, function () {
         .db("inshare")
         .collection("users")
         .findOne({
-          _id: ObjectId(request.session.user._id),
+          "_id": ObjectId(request.session.user._id),
         });
 
         var updatedArray = await removeSharedFileReturnUpdated(user.sharedWithMe, _id);

@@ -15,7 +15,7 @@
         </div>
 
         <div class="col=md-4">
-            <% if (_id != null) {%>
+            <% if (_id != null) { %>
 
                 <div class="dropdown" style="display: initial">
                   <button
@@ -23,9 +23,9 @@
                       data-toggle="dropdown"
                       aria-haspopup="true"
                       aria-expanded="false"
-                      class="btn btn-primary"
-                  >
-                      More <span class="caret"></span>
+                      class="btn btn-primary">
+                      More 
+                      <span class="caret"></span>
                   </button>
                   <ul class="dropdown-menu">
                     <li>
@@ -167,6 +167,8 @@
 
             var modalBodyHtml = "";
             modalBodyHtml += "<p>Created at:" + createdAt + "</p>";
+            modalBodyHtml += "<button type = 'button' class='btn btn-success' onclick='downloadFile(this);' data-id = '" + _id + "'>Download</button>";
+
             document.querySelector("#viewFileModal .modal-body").innerHTML =
             modalBodyHtml;
             $("#viewFileModal").modal("show");

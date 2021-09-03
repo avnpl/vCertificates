@@ -430,6 +430,8 @@
 
     var modalBodyHtml = "";
     modalBodyHtml += "<p>Created at:" + createdAt + "</p>";
+    modalBodyHtml += "<button type = 'button' class='btn btn-success' onclick='downloadFile(this);' data-id = '" + _id + "'>Download</button>";
+
     document.querySelector("#viewFileModal .modal-body").innerHTML =
       modalBodyHtml;
     $("#viewFileModal").modal("show");
@@ -472,6 +474,71 @@
       }
     });
   }
+
+  function downloadFile(self) {
+        var _id = self.getAttribute("data-id");
+        
+        self.innerHTML = "Loading...";
+        self.setAttribute("disabled", "disabled");
+
+        //var XMLHttpRequest = require(["xmlhttprequest"]).XMLHttpRequest;
+        var ajax = new XMLHttpRequest();
+        ajax.open("POST", document.getElementById("base-url").value + "/DownloadFile", true);
+
+        ajax.onreadystatechange = function () {
+        if(this.readyState == 4) {
+            if(this.status == 200) {
+                var data = JSON.parse(this.responseText);
+
+                self.removeAttribute("disabled");
+                self.innerHTML = "Download";
+                if(data.status =="error") {
+                    swal("Error", data.message, "error");
+                }
+
+                if(data.status == "success") {
+                    //response will be a buffer array
+                    // convert that into base64 
+
+                   
+
+                    var binary = ' ';
+                    var bytes = new Uint8Array(data.arrayBuffer.data);
+                    
+                    var len = bytes.byteLength();
+                    
+                    
+                    for(var i=0;i<len;i++) {
+                    binary += String.fromCharCode( bytes[ i ] );
+                    }
+                    var base64 = window.btoa( binary );
+                    base64 = "data:" + data.fileType + ";base64," + base64;
+
+                    //download the file
+                    const fileName = data.fileName;
+                    const link = document.createElement('a');
+                    //browsers that support HTML5 download attribute 
+                    if(link.download !== undefined) {
+                      link.setAttribute("href", base64);
+                      link.setAttribute('download', fileName);
+                      link.style.visibility = 'hidden';
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }
+                }
+            }
+
+            if(this.status == 500) {
+              console.log(this.responseText);
+            }
+        }
+    };
+
+    var formData = new FormData();
+    formData.append("_id", _id);
+    ajax.send(formData);
+}
 
   function confirmDeleteFile(form) {
     console.log("function called");
