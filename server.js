@@ -51,7 +51,7 @@ var nodemailerObject = {
   secure: true,
   auth: {
     user: "2322rohini@gmail.com",
-    pass: "TUBELIGHT@12",
+    pass: "tubelight",
   },
 };
 
