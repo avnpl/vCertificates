@@ -4,6 +4,7 @@ var httpObj = require("http");
 var http = httpObj.createServer(app);
 const fs = require("fs");
 
+
 var mainURL = "http://localhost:3000";
 
 const MongoClient = require("mongodb").MongoClient;
@@ -42,6 +43,7 @@ app.use(formidable());
 
 var bcrypt = require("bcrypt");
 var nodemailer = require("nodemailer");
+const { DownloaderHelper} = require('node-downloader-helper');
 
 var nodemailerFrom = "2322rohini@gmail.com";
 var nodemailerObject = {
@@ -56,6 +58,7 @@ var nodemailerObject = {
 };
 
 var fileSystem = require("fs");
+var request = require('request');
 
 var rimraf = require("rimraf");
 
@@ -202,24 +205,24 @@ function recursiveGetSharedFolder ( files, _id) {
 
 // recursive function to remove the shared folder and return the updated array
 function removeSharedFolderReturnUpdated ( arr, _id) {
-  
+
 
   for(var a= 0; a < arr.length; a++) {
     var file = (typeof arr[a].file === "undefined") ? arr[a] : arr[a].file;
 
-    
+
     if (file.type == "folder") {
       if(file._id == _id) {
         arr.splice(a, 1);
         break;
-       
+
       }
 
       //if it has sub folders, then do the recursion
       if(file.files.length > 0 ) {
         file._id = ObjectId(file._id);
         removeSharedFolderReturnUpdated(file.files, _id);
-        
+
       }
     }
 
@@ -230,33 +233,33 @@ function removeSharedFolderReturnUpdated ( arr, _id) {
 
 // recursive function to remove the shared file and return the updated array
 function removeSharedFileReturnUpdated ( arr, _id) {
-  
+
 
   for(var a= 0; a < arr.length; a++) {
     var file = (typeof arr[a].file === "undefined") ? arr[a] : arr[a].file;
 
     //return if the file if found
     if (file.type != "folder" && file._id == _id) {
-     
+
         arr.splice(a, 1);
         break;
-       
+
     }
 
       //if it has sub-folders, then do the recursion
       if(file.type == "folder" && file.files.length > 0 ) {
         arr[a]._id = ObjectId(arr[a]._id);
         removeSharedFileReturnUpdated(file.files, _id);
-        
+
       }
     }
 
-  
+
 
   return arr;
 }
 
-// recursive function to get the shared file 
+// recursive function to get the shared file
 function recursiveGetSharedFile ( files, _id) {
   var singleFile = null;
 
@@ -288,24 +291,24 @@ http.listen(3000, function () {
     console.log("Connected to MongoDB server...");
 
     //download file
-    app.post("/DownloadFile", async function (request, result) { 
+    app.post("/DownloadFile", async function (request, result) {
       const _id = request.fields._id;
       //console.log("function called");
 
       if (request.session.user) {
-          var user = await mongo 
+          var user = await mongo
           .db("inshare")
           .collection("users")
           .findOne({
             "_id": ObjectId(request.session.user._id),
           });
-          
+
 
           var fileUploaded = await recursiveGetFile(user.uploaded, _id);
           //console.log("recursive file called");
           var fileShared = await recursiveGetSharedFile(user.sharedWithMe, _id);
           //console.log("recursive shared file called");
-          
+
           if (fileUploaded == null && fileShared == null) {
             result.json({
               "status": "error",
@@ -314,33 +317,46 @@ http.listen(3000, function () {
             return false;
           }
 
+          if(fileUploaded != null ){
+            console.log("file is found, yet to be downloaded");
+          }
+
           var file = (fileUploaded == null) ?  fileShared : fileUploaded;
+          console.log(file);
 
-          fileSystem.readFile(file.filePath, function(error, data) {
-            result.json({
-              "status": "success",
-              "message": "Data has been fetched.",
-              "arrayBuffer": data,
-              "fileType": file.type,
-              "fileName": file.name
-            });
-          });
 
-          return false;
+
+          // fileSystem.readFile(file.filePath, function(error, data) {
+          //   result.json({
+          //     "status": "success",
+          //     "message": "Data has been fetched.",
+          //     "arrayBuffer": data,
+          //     "fileType": file.type,
+          //     "fileName": file.name
+          //   });
+          //
+          // });
+          var filePath = __dirname+ "/" + file.filePath;
+          result.sendFile(filePath);
+          console.log(filePath);
+
+      }else{
+        result.json({
+          "status": "error",
+          "message": "Please login to perform this action."
+        }) ;
+
+        return false;
       }
-      result.json({
-        "status": "error",
-        "message": "Please login to perform this action."
-      }) ;
-      return false; 
+
     });
 
     //delete shared file
-    app.post("/DeleteSharedFile", async function (request, result) { 
+    app.post("/DeleteSharedFile", async function (request, result) {
       const _id = request.fields._id;
 
       if (request.session.user) {
-        var user = await mongo 
+        var user = await mongo
         .db("inshare")
         .collection("users")
         .findOne({
@@ -373,11 +389,11 @@ http.listen(3000, function () {
 
 
     //delete shared folder
-    app.post("/DeleteSharedDirectory", async function (request, result) { 
+    app.post("/DeleteSharedDirectory", async function (request, result) {
       const _id = request.fields._id;
 
       if (request.session.user) {
-        var user = await mongo 
+        var user = await mongo
         .db("inshare")
         .collection("users")
         .findOne({
@@ -423,7 +439,7 @@ http.listen(3000, function () {
 
         var files = null;
         var folderName = "";
-        
+
         if (typeof _id == "undefined") {
           files = user.sharedWithMe;
         } else {
@@ -441,7 +457,7 @@ http.listen(3000, function () {
 
           files = folderObj.files;
           folderName = folderObj.folderName;
-          
+
         }
 
         if (files == null) {
@@ -458,7 +474,7 @@ http.listen(3000, function () {
           "files": files,
           "_id": _id,
           "folderName": folderName,
-          
+
         });
         return false;
       }
@@ -467,7 +483,7 @@ http.listen(3000, function () {
 
     app.post("/RemoveSharedAccess", async function (request, result){
       const _id = request.fields._id;
-      
+
       if(request.session.user) {
         const user = await mongo
         .db("inshare")
@@ -481,7 +497,7 @@ http.listen(3000, function () {
         });
 
         // remove from array
-        for(var a=0; a < user.sharedWithMe.length; a++){          
+        for(var a=0; a < user.sharedWithMe.length; a++){
             if (user.sharedWithMe[a]._id == _id) {
               user.sharedWithMe.splice(a,1);
             }
@@ -495,7 +511,7 @@ http.listen(3000, function () {
           }, {
             "sharedWithMe.sharedBy._id": ObjectId(request.session.user._id)
           }]
-          
+
         }, {
           $set: {
             "sharedWithMe": user.sharedWithMe
@@ -509,7 +525,7 @@ http.listen(3000, function () {
         result.redirect(backURL);
         return false;
 
-        
+
       }
 
       result.redirect("/Login");
@@ -518,7 +534,7 @@ http.listen(3000, function () {
     //get users to whom file has been shared
     app.post("/GetFileSharedWith", async function(request, result){
       const _id = request.fields._id;
-      
+
       if(request.session.user) {
         const tempUsers = await mongo
         .db("inshare")
@@ -582,7 +598,7 @@ http.listen(3000, function () {
             request.session.status = "error";
             request.session.message = "User " + email + "does not exist.";
             result.redirect("/MyUploads");
-          
+
             return false;
           }
 
@@ -590,17 +606,17 @@ http.listen(3000, function () {
             request.session.status = "error";
             request.session.message = "User " + user.name + "account is not verified.";
             result.redirect("/MyUploads");
-          
+
             return false;
-            
+
           }
           var me = await mongo
           .db("inshare")
           .collection("users")
           .findOne({
             "_id" : ObjectId(request.session.user._id)
-          });  
-          
+          });
+
           var file = null;
           if (type == "folder") {
             file = await recursiveGetFolder(me.uploaded, _id);
@@ -612,7 +628,7 @@ http.listen(3000, function () {
             request.session.status = "error";
             request.session.message = "File does not exist.";
             result.redirect("/MyUploads");
-              
+
             return false;
 
           }
@@ -642,7 +658,7 @@ http.listen(3000, function () {
 
         request.session.status = "success";
         request.session.message = "File has been shared with " + user.name + ".";
-        
+
         const backURL = request.header('Referer') || "/";
         result.redirect(backURL);
       }
@@ -694,7 +710,7 @@ http.listen(3000, function () {
         "status": "error",
         "message": "Please login to perform this action."
       });
-      return false;        
+      return false;
     });
 
     // Route to delete directory
