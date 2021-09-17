@@ -485,18 +485,27 @@
         self.innerHTML = "Loading...";
         self.setAttribute("disabled", "disabled");
 
-        var XMLHttpRequest = require(["xmlhttprequest"]).XMLHttpRequest;
+        // var XMLHttpRequest = require(["xmlhttprequest"]).XMLHttpRequest;
         var ajax = new XMLHttpRequest();
         ajax.open("POST", document.getElementById("base-url").value + "/DownloadFile", true);
 
         ajax.onreadystatechange = function () {
         if(this.readyState == 4) {
             if(this.status == 200) {
-              console.log(responseText);
                 // var data = JSON.parse(this.responseText);
-                var data = XMLHttpRequest.responseText;
+                var data = ajax.responseText;
                 self.removeAttribute("disabled");
                 self.innerHTML = "Download";
+
+                var blob = new Blob([data], {type: 'image/jpeg'}); // change the type accordingly
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = "filename.jpg";
+                document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+                a.click();    
+                a.remove();
+
                 if(data.status =="error") {
                     swal("Error", data.message, "error");
                 }
@@ -538,7 +547,7 @@
         //     <!-- }
         //
             if(this.status == 500) {
-              console.log(this.responseText);
+              console.log(ajax.responseText);
             }
         }
 
