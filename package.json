@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "nodemon -e ejs,json,js server.js"
   },
   "author": "",
   "license": "ISC",
@@ -26,6 +26,7 @@
     "mongodb": "^4.0.0",
     "node-downloader-helper": "^1.0.18",
     "nodemailer": "^6.6.3",
+    "path": "^0.12.7",
     "request": "^2.88.2",
     "rimraf": "^3.0.2",
     "uint8arrays": "^3.0.0"
