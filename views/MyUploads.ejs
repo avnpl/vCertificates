@@ -44,7 +44,7 @@
                 data-dismiss="modal"
                 data-id="<%= _id %>"
                 data-type="folder">
-              Share
+                Share
               </button>
           </li>
 
@@ -335,7 +335,8 @@
 
               var sharedAt= user.sharedObj.sharedAt;
               sharedAt = new Date(sharedAt);
-              sharedAt = sharedAt.getDate() +" " + months[sharedAt.getMonth()] + ", " + sharedAt.getFullYear() + "<br/>" + sharedAt.getHours() + ":" + sharedAt.getSeconds();
+              sharedAt = sharedAt.getDate() +" " + months[sharedAt.getMonth()] + ", " + sharedAt.getFullYear() + "<br/>" + sharedAt.getHours() + ":"
+              + sharedAt.getMinutes() + ":" + sharedAt.getSeconds();
 
               html += `<tr>
                   <td>` + user.name + `</td>
@@ -343,7 +344,7 @@
                   <td>` + sharedAt + `</td>
                   <td>
 
-                        <form method = "POST" action="` + document.getElementById("base-url").value + `/RemoveSharedAccess" onsubmit="return confirm('Are you sure you want to remove thhis shared access?');">
+                        <form method = "POST" action="` + document.getElementById("base-url").value + `/RemoveSharedAccess" onsubmit="return confirm('Are you sure you want to remove this shared access?');">
                         <input type="hidden" name="_id" value="` + user.sharedObj._id + `" />
                         <input type="submit" class="btn btn-danger" value="Remove access" />
                         </form>
@@ -417,18 +418,22 @@
     var createdAt = self.getAttribute("data-created-at");
     createdAt = parseFloat(createdAt);
     createdAt = new Date(createdAt);
+    
     createdAt =
-      createdAt.getDate() +
-      " " +
-      createdAt.getMonth() +
-      ", " +
-      createdAt.getFullYear() +
-      " " +
-      createdAt.getHours() +
-      ":" +
-      createdAt.getMinutes() +
-      ":" +
-      createdAt.getSeconds();
+      createdAt.getDate() + " " + months[createdAt.getMonth()] + ", " +
+      createdAt.getFullYear() + " " + createdAt.getHours() + ":" +
+      createdAt.getMinutes() + ":" + createdAt.getSeconds(); 
+      // createdAt.getDate() +
+      // " " +
+      // createdAt.getMonth() +
+      // ", " +
+      // createdAt.getFullYear() +
+      // " " +
+      // createdAt.getHours() +
+      // ":" +
+      // createdAt.getMinutes() +
+      // ":" +
+      // createdAt.getSeconds();
 
     document.querySelector("#viewFileModal .modal-title").innerHTML = name;
 

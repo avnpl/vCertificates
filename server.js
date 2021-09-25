@@ -53,7 +53,7 @@ var nodemailerObject = {
   secure: true,
   auth: {
     user: "2322rohini@gmail.com",
-    pass: "tubelight",
+    pass: "TUBELIGHT@12",
   },
 };
 
@@ -165,17 +165,34 @@ function recursiveGetFile ( files, _id) {
         return file;
       }
     }
+    if (file.type == "folder") {
+      if (file._id == _id) {
+        return file;
+      }
 
-    //if it is a folder and has files, then do this recursion
-    if(file.type == "folder" && file.files.length > 0) {
-      singleFile = recursiveGetFile(file.files, _id);
-      //return the file if found in sub folders
-      if(singleFile != null) {
-        return singleFile;
+      // if it has files, then do the recursion
+      if (file.type == "folder" && file.files.length > 0) {
+        singleFile = recursiveGetFolder(file.files, _id);
+        //return the file if found in sub-folders
+        if (singleFile != null) {
+          return singleFile;
+        }
       }
     }
+    
+
+    // //if it is a folder and has files, then do this recursion
+    // if(file.type == "folder" && file.files.length > 0) {
+    //   singleFile = recursiveGetFile(file.files, _id);
+    //   //return the file if found in sub folders
+    //   if(singleFile != null) {
+    //     return singleFile;
+    //   }
+    // }
   }
 }
+
+
 
 // recursive function to get the shared folder
 function recursiveGetSharedFolder ( files, _id) {
@@ -616,12 +633,18 @@ http.listen(3000, function () {
           .findOne({
             "_id" : ObjectId(request.session.user._id)
           });
-
-          var file = null;
+          
+          // var file = files[a];
+          var file = null;    
+        
           if (type == "folder") {
-            file = await recursiveGetFolder(me.uploaded, _id);
+            file = await recursiveGetFile(me.uploaded, _id);
+             console.log("function called");
+            // file = await foldershare(me.uploaded, _id);
+            // console.log("function called");
           } else {
-            file = await recursiveGetFolder(me.uploaded, _id);
+            file = await recursiveGetFile(me.uploaded, _id);
+            
           }
 
           if(file == null) {
@@ -641,23 +664,28 @@ http.listen(3000, function () {
           .collection("users")
           .findOneAndUpdate({
             "_id" : user._id
-          }, {
-              $push: {
-                "sharedWithMe": {
-                  "_id": ObjectId(),
-                  "file": file,
-                  "sharedBy": {
-                    "_id": ObjectId(sharedBy._id),
-                    "name": sharedBy.name,
-                    "email": sharedBy.email
-                  },
-                  "createdAt": new Date().getTime()
+            }, {
+                $push: {
+                  "sharedWithMe": {
+                      "_id": ObjectId(),
+                      "file": file,
+                      "sharedBy": {
+                        "_id": ObjectId(sharedBy._id),
+                        "name": sharedBy.name,
+                        "email": sharedBy.email
+                    },
+                    "createdAt": new Date().getTime()
+                  }
                 }
-              }
-      });
+        });
 
         request.session.status = "success";
-        request.session.message = "File has been shared with " + user.name + ".";
+        if(file.type != "folder"){
+          request.session.message = "File has been shared with " + user.name + ".";
+        } else{
+          request.session.message = "Folder has been shared with " + user.name + ".";
+        }
+        
 
         const backURL = request.header('Referer') || "/";
         result.redirect(backURL);
