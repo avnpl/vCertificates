@@ -79,14 +79,14 @@
         </ul>
       </div>
       <% } %>
-      <a
+      <button
         href="#"
         id="open-file-uploader"
         class="btn btn-primary"
-        on
-        click="selectFileForUpload();"
-        >Upload</a
+        onClick="selectFileForUpload();"
       >
+        Upload
+      </button>
 
       <button
         type="button"
@@ -166,15 +166,16 @@
   action="<%= request.mainURL %>/UploadFile"
   enctype="multipart/form-data"
   id="form-upload-file"
+  type="hidden"
 >
   <input type="hidden" name="_id" value="<%= _id %>" />
   <input
     type="file"
     name="file"
     id="input-file-upload"
-    style="position: fixed"
     onchange="confirmUpload();"
     required
+    style="visibility: hidden"
   />
 </form>
 
