@@ -1,6 +1,6 @@
 <!-- <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" /> -->
 <!DOCTYPE html>
-<meta charset="utf-8">
+<meta charset="utf-8" />
 
 <%- include ("includes/header", { "title": "My Uploads" }) %>
 
@@ -29,47 +29,52 @@
 
       <div class="dropdown" style="display: initial">
         <button
-            type="button"
-            data-toggle="dropdown"
-            aria-haspopup="true"
-            aria-expanded="false"
-            class="btn btn-primary"
+          type="button"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false"
+          class="btn btn-primary"
         >
-            More <span class="caret"></span>
+          More <span class="caret"></span>
         </button>
         <ul class="dropdown-menu">
-
           <li>
-              <button type="button" class="btn btn-primary btn-block" onclick="showShareModal(this);"
-                data-dismiss="modal"
-                data-id="<%= _id %>"
-                data-type="folder">
-                Share
-              </button>
+            <button
+              type="button"
+              class="btn btn-primary btn-block"
+              onclick="showShareModal(this);"
+              data-dismiss="modal"
+              data-id="<%= _id %>"
+              data-type="folder"
+            >
+              Share
+            </button>
           </li>
 
           <li>
-            <button type="button" class="btn btn-info btn-block" onclick="showSharedWithModal(this);"
-                data-dismiss="modal"
-                data-id="<%= _id %>"
+            <button
+              type="button"
+              class="btn btn-info btn-block"
+              onclick="showSharedWithModal(this);"
+              data-dismiss="modal"
+              data-id="<%= _id %>"
             >
               Shared with
             </button>
-
           </li>
           <li>
-              <form
-                action="<%= request.mainURL %>/DeleteDirectory"
-                onsubmit="return confirm('are you sure you want to delete this folder and all the files in it?'); "
-                method="POST"
-              >
-                <input type="hidden" name="_id" value="<%= _id %>" required />
-                <input
-                  type="submit"
-                  value="Delete"
-                  class="btn btn-danger btn-block"
-                />
-              </form>
+            <form
+              action="<%= request.mainURL %>/DeleteDirectory"
+              onsubmit="return confirm('are you sure you want to delete this folder and all the files in it?'); "
+              method="POST"
+            >
+              <input type="hidden" name="_id" value="<%= _id %>" required />
+              <input
+                type="submit"
+                value="Delete"
+                class="btn btn-danger btn-block"
+              />
+            </form>
           </li>
         </ul>
       </div>
@@ -93,54 +98,58 @@
     </div>
   </div>
 
-  <div class="row">
+  <div class="row row-cols-1 row-cols-md-4 gap-3 g-4">
     <% uploaded.forEach(function(singleFile) { var fileSize = 0; %>
-    <div class="card">
-      <div
-        class="card-body"
-        style="font-size: 100px; text-align: center; height: 300px"
-      >
-        <% if (singleFile.type == "folder") { %>
-        <i class="fa fa-folder-open-o"></i>
-        <% } else { %>
-        <i class="fa fa-file-text-o"></i>
-        <% } %>
-      </div>
-      <div class="card-footer">
-        <div class="row">
-          <div class="col-md-8">
-            <% if(singleFile.type == "folder") { fileSize =
-            getFolderSize(singleFile.files); fileSize = formatBytes(fileSize);
-            %>
-            <h3>
-              <a href="<%= request.mainURL + '/MyUploads/' +singleFile._id %>">
-                <%= singleFile.folderName.substring(0,10) %> <%=
-                (singleFile.folderName.length > 10) ? "..." : "" %>
-              </a>
-            </h3>
-            <% } else { fileSize = formatBytes(singleFile.size); %>
-            <h3>
-              <a
-                href="#"
-                onclick="viewFile(this);"
-                data-id="<%=singleFile._id %>"
-                data-name="<%= singleFile.name %>"
-                data-type="<%= singleFile.createdAt %>"
-              >
-                <%=singleFile.name.substring(0,10) %> <%=
-                (singleFile.name.length > 10) ? "..." : "" %>
-              </a>
-            </h3>
-            <% } %>
-          </div>
-          <div class="col-md-4">
-            <p style="position: relative; top: 10px"><%= fileSize %></p>
+    <div class="col py-3">
+      <div class="card">
+        <div
+          class="card-body"
+          style="font-size: 100px; text-align: center; height: 300px"
+        >
+          <% if (singleFile.type == "folder") { %>
+          <i class="fa fa-folder-open-o"></i>
+          <% } else { %>
+          <i class="fa fa-file-text-o"></i>
+          <% } %>
+        </div>
+        <div class="card-footer">
+          <div class="row">
+            <div class="col-md-8">
+              <% if(singleFile.type == "folder") { fileSize =
+              getFolderSize(singleFile.files); fileSize = formatBytes(fileSize);
+              %>
+              <h3>
+                <a
+                  href="<%= request.mainURL + '/MyUploads/' +singleFile._id %>"
+                >
+                  <%= singleFile.folderName.substring(0,10) %> <%=
+                  (singleFile.folderName.length > 10) ? "..." : "" %>
+                </a>
+              </h3>
+              <% } else { fileSize = formatBytes(singleFile.size); %>
+              <h3>
+                <a
+                  href="#"
+                  onclick="viewFile(this);"
+                  data-id="<%=singleFile._id %>"
+                  data-name="<%= singleFile.name %>"
+                  data-type="<%= singleFile.createdAt %>"
+                >
+                  <%=singleFile.name.substring(0,10) %> <%=
+                  (singleFile.name.length > 10) ? "..." : "" %>
+                </a>
+              </h3>
+              <% } %>
+            </div>
+            <div class="col-md-4">
+              <p style="position: relative; top: 10px"><%= fileSize %></p>
+            </div>
           </div>
         </div>
       </div>
     </div>
+    <% }) %>
   </div>
-  <% }) %>
 </div>
 
 <form
@@ -195,16 +204,19 @@
           Close
         </button>
 
-        <button type="button" class="btn btn-primary" onclick="showShareModal(this);"
+        <button
+          type="button"
+          class="btn btn-primary"
+          onclick="showShareModal(this);"
           data-dismiss="modal"
           data-id=""
           data-type=""
-          id="button-share-file">
+          id="button-share-file"
+        >
           Share
         </button>
 
         <form
-
           class=""
           action="<%= request.mainURL %>/DeleteFile"
           id="form-delete-file"
@@ -224,9 +236,9 @@
   </div>
 </div>
 
-<div class="modal fade" id = "shareModal">
+<div class="modal fade" id="shareModal">
   <div class="modal-dialog">
-    <div class = "modal-content">
+    <div class="modal-content">
       <div class="modal-header">
         <h4 class="modal-title">Share with</h4>
         <button
@@ -240,15 +252,26 @@
       </div>
 
       <div class="modal-body">
-        <form method="POST" action="<%= request.mainURL %>/Share" id="form-share-modal">
-          <input type="hidden" name="_id" required/>
-          <input type="hidden" name="type" required/>
+        <form
+          method="POST"
+          action="<%= request.mainURL %>/Share"
+          id="form-share-modal"
+        >
+          <input type="hidden" name="_id" required />
+          <input type="hidden" name="type" required />
 
           <div class="form-group">
             <label>Enter email</label>
             <input type="email" name="email" class="form-control" required />
 
-            <button type="button" class="btn btn-default" onclick="searchUserForShare(this);" style="margin-top: 10px;">Confirm User</button>
+            <button
+              type="button"
+              class="btn btn-default"
+              onclick="searchUserForShare(this);"
+              style="margin-top: 10px"
+            >
+              Confirm User
+            </button>
           </div>
 
           <div id="user-details-for-share"></div>
@@ -258,8 +281,12 @@
         <button type="button" class="btn btn-default" data-dismiss="modal">
           Close
         </button>
-          <input type="submit" class="btn btn-primary" value="Share" form="form-share-modal" />
-
+        <input
+          type="submit"
+          class="btn btn-primary"
+          value="Share"
+          form="form-share-modal"
+        />
       </div>
     </div>
   </div>
@@ -313,54 +340,81 @@
     const _id = self.getAttribute("data-id");
     $("#sharedWithModal").modal("show");
 
-    document.querySelector("#sharedWithModal .loading").innerHTML = "Loading...";
+    document.querySelector("#sharedWithModal .loading").innerHTML =
+      "Loading...";
     var ajax = new XMLHttpRequest();
-    ajax.open("POST", document.getElementById("base-url").value + "/GetFileSharedWith", true);
+    ajax.open(
+      "POST",
+      document.getElementById("base-url").value + "/GetFileSharedWith",
+      true
+    );
 
-    ajax.onreadystatechange = function() {
+    ajax.onreadystatechange = function () {
       if (this.readyState == 4) {
-        if(this.status == 200) {
+        if (this.status == 200) {
           var data = JSON.parse(this.responseText);
 
-          document.querySelector("#sharedWithModal .loading").innerHTML="";
+          document.querySelector("#sharedWithModal .loading").innerHTML = "";
 
           if (data.status == "error") {
             swal("Error", data.message, "error");
           }
 
-          if(data.status == "success") {
+          if (data.status == "success") {
             var html = "";
-            for (var a = 0; a<data.users.length; a++) {
+            for (var a = 0; a < data.users.length; a++) {
               const user = data.users[a];
 
-              var sharedAt= user.sharedObj.sharedAt;
+              var sharedAt = user.sharedObj.sharedAt;
               sharedAt = new Date(sharedAt);
-              sharedAt = sharedAt.getDate() +" " + months[sharedAt.getMonth()] + ", " + sharedAt.getFullYear() + "<br/>" + sharedAt.getHours() + ":"
-              + sharedAt.getMinutes() + ":" + sharedAt.getSeconds();
+              sharedAt =
+                sharedAt.getDate() +
+                " " +
+                months[sharedAt.getMonth()] +
+                ", " +
+                sharedAt.getFullYear() +
+                "<br/>" +
+                sharedAt.getHours() +
+                ":" +
+                sharedAt.getMinutes() +
+                ":" +
+                sharedAt.getSeconds();
 
-              html += `<tr>
-                  <td>` + user.name + `</td>
-                  <td>` + user.email + `</td>
-                  <td>` + sharedAt + `</td>
+              html +=
+                `<tr>
+                  <td>` +
+                user.name +
+                `</td>
+                  <td>` +
+                user.email +
+                `</td>
+                  <td>` +
+                sharedAt +
+                `</td>
                   <td>
 
-                        <form method = "POST" action="` + document.getElementById("base-url").value + `/RemoveSharedAccess" onsubmit="return confirm('Are you sure you want to remove this shared access?');">
-                        <input type="hidden" name="_id" value="` + user.sharedObj._id + `" />
+                        <form method = "POST" action="` +
+                document.getElementById("base-url").value +
+                `/RemoveSharedAccess" onsubmit="return confirm('Are you sure you want to remove this shared access?');">
+                        <input type="hidden" name="_id" value="` +
+                user.sharedObj._id +
+                `" />
                         <input type="submit" class="btn btn-danger" value="Remove access" />
                         </form>
                         </td>
                     </tr>`;
-
             }
-            document.querySelector("#sharedWithModal .modal-body tbody").innerHTML = html;
+            document.querySelector(
+              "#sharedWithModal .modal-body tbody"
+            ).innerHTML = html;
           }
         }
 
-        if(this.status == 500) {
+        if (this.status == 500) {
           console.log(this.responseText);
         }
-    }
-  };
+      }
+    };
 
     var formData = new FormData();
     formData.append("_id", _id);
@@ -371,28 +425,32 @@
     self.setAttribute("disabled", "disabled");
 
     var ajax = new XMLHttpRequest();
-    ajax.open("POST", document.getElementById("base-url").value + "/GetUser", true);
+    ajax.open(
+      "POST",
+      document.getElementById("base-url").value + "/GetUser",
+      true
+    );
 
-    ajax.onreadystatechange = function() {
+    ajax.onreadystatechange = function () {
       if (this.readyState == 4) {
-        if(this.status == 200) {
+        if (this.status == 200) {
           var data = JSON.parse(this.responseText);
 
           self.removeAttribute("disabled");
           self.innerHTML = "Confirm User";
 
-          if(data.status == "error") {
+          if (data.status == "error") {
             swal("Error", data.message, "error");
           }
 
-          if(data.status == "success") {
+          if (data.status == "success") {
             var html = "";
             html += "<p>Name: " + data.user.name + "</p>";
             document.getElementById("user-details-for-share").innerHTML = html;
           }
         }
 
-        if(this.status == 500) {
+        if (this.status == 500) {
           console.log(this.responseText);
         }
       }
@@ -401,12 +459,13 @@
     var form = document.getElementById("form-share-modal");
     var formData = new FormData(form);
     ajax.send(formData);
-
   }
 
   function showShareModal(self) {
-    document.getElementById("form-share-modal")._id.value = self.getAttribute("data-id");
-    document.getElementById("form-share-modal").type.value = self.getAttribute("data-type");
+    document.getElementById("form-share-modal")._id.value =
+      self.getAttribute("data-id");
+    document.getElementById("form-share-modal").type.value =
+      self.getAttribute("data-type");
     $("#shareModal").modal("show");
   }
 
@@ -418,28 +477,39 @@
     var createdAt = self.getAttribute("data-created-at");
     createdAt = parseFloat(createdAt);
     createdAt = new Date(createdAt);
-    
+
     createdAt =
-      createdAt.getDate() + " " + months[createdAt.getMonth()] + ", " +
-      createdAt.getFullYear() + " " + createdAt.getHours() + ":" +
-      createdAt.getMinutes() + ":" + createdAt.getSeconds(); 
-      // createdAt.getDate() +
-      // " " +
-      // createdAt.getMonth() +
-      // ", " +
-      // createdAt.getFullYear() +
-      // " " +
-      // createdAt.getHours() +
-      // ":" +
-      // createdAt.getMinutes() +
-      // ":" +
-      // createdAt.getSeconds();
+      createdAt.getDate() +
+      " " +
+      months[createdAt.getMonth()] +
+      ", " +
+      createdAt.getFullYear() +
+      " " +
+      createdAt.getHours() +
+      ":" +
+      createdAt.getMinutes() +
+      ":" +
+      createdAt.getSeconds();
+    // createdAt.getDate() +
+    // " " +
+    // createdAt.getMonth() +
+    // ", " +
+    // createdAt.getFullYear() +
+    // " " +
+    // createdAt.getHours() +
+    // ":" +
+    // createdAt.getMinutes() +
+    // ":" +
+    // createdAt.getSeconds();
 
     document.querySelector("#viewFileModal .modal-title").innerHTML = name;
 
     var modalBodyHtml = "";
     modalBodyHtml += "<p>Created at:" + createdAt + "</p>";
-    modalBodyHtml += "<button type = 'button' class='btn btn-success' onclick='downloadFile(this);' data-id = '" + _id + "'>Download</button>";
+    modalBodyHtml +=
+      "<button type = 'button' class='btn btn-success' onclick='downloadFile(this);' data-id = '" +
+      _id +
+      "'>Download</button>";
 
     document.querySelector("#viewFileModal .modal-body").innerHTML =
       modalBodyHtml;
@@ -447,7 +517,9 @@
 
     document.getElementById("form-delete-file")._id.value = _id;
     document.getElementById("button-share-file").setAttribute("data-id", _id);
-    document.getElementById("button-share-file").setAttribute("data-type", type);
+    document
+      .getElementById("button-share-file")
+      .setAttribute("data-type", type);
   }
 
   function confirmUpload() {
@@ -485,91 +557,92 @@
   }
 
   function downloadFile(self) {
-        var _id = self.getAttribute("data-id");
-        //
-        self.innerHTML = "Loading...";
-        self.setAttribute("disabled", "disabled");
+    var _id = self.getAttribute("data-id");
+    //
+    self.innerHTML = "Loading...";
+    self.setAttribute("disabled", "disabled");
 
-        // var XMLHttpRequest = require(["xmlhttprequest"]).XMLHttpRequest;
-        var ajax = new XMLHttpRequest();
-        ajax.open("POST", document.getElementById("base-url").value + "/DownloadFile", true);
+    // var XMLHttpRequest = require(["xmlhttprequest"]).XMLHttpRequest;
+    var ajax = new XMLHttpRequest();
+    ajax.open(
+      "POST",
+      document.getElementById("base-url").value + "/DownloadFile",
+      true
+    );
 
-        ajax.onreadystatechange = function () {
-        if(this.readyState == 4) {
-            if(this.status == 200) {
-                // var data = JSON.parse(this.responseText);
-                var data = ajax.responseText;
-                self.removeAttribute("disabled");
-                self.innerHTML = "Download";
+    ajax.onreadystatechange = function () {
+      if (this.readyState == 4) {
+        if (this.status == 200) {
+          // var data = JSON.parse(this.responseText);
+          var data = ajax.responseText;
+          self.removeAttribute("disabled");
+          self.innerHTML = "Download";
 
-                var blob = new Blob([data], {type: 'image/jpeg'}); // change the type accordingly
-                var url = window.URL.createObjectURL(blob);
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = "filename.jpg";
-                document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
-                a.click();    
-                a.remove();
+          var blob = new Blob([data], { type: "image/jpeg" }); // change the type accordingly
+          var url = window.URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url;
+          a.download = "filename.jpg";
+          document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+          a.click();
+          a.remove();
 
-                if(data.status =="error") {
-                    swal("Error", data.message, "error");
-                }
-                if(data.status == "success") {
-                    //response will be a buffer array
-                    // convert that into base64
+          if (data.status == "error") {
+            swal("Error", data.message, "error");
+          }
+          if (data.status == "success") {
+            //response will be a buffer array
+            // convert that into base64
 
-                    var binary = ' ';
-                    var bytes = new Uint8Array(data.arrayBuffer.data);
+            var binary = " ";
+            var bytes = new Uint8Array(data.arrayBuffer.data);
 
-                    var len = bytes.byteLength();
+            var len = bytes.byteLength();
 
+            for (var i = 0; i < len; i++) {
+              binary += String.fromCharCode(bytes[i]);
+            }
+            var base64 = window.btoa(binary);
+            base64 = "data:" + data.fileType + ";base64," + base64;
 
-                    for(var i=0;i<len;i++) {
-                    binary += String.fromCharCode( bytes[ i ] );
-                    }
-                    var base64 = window.btoa( binary );
-                    base64 = "data:" + data.fileType + ";base64," + base64;
-
-                    // download the file
-                    const fileName = data.fileName;
-                    const link = document.createElement('a');
-                    //browsers that support HTML5 download attribute
-                    if(link.download !== undefined) {
-                      link.setAttribute("href", base64);
-                      link.setAttribute('download', fileName);
-                      link.style.visibility = 'hidden';
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-
-                    }
-                  }
-                }
-                    // var path = file.filePath;
-                    // result.download(path);
-                //     }
-                // }
+            // download the file
+            const fileName = data.fileName;
+            const link = document.createElement("a");
+            //browsers that support HTML5 download attribute
+            if (link.download !== undefined) {
+              link.setAttribute("href", base64);
+              link.setAttribute("download", fileName);
+              link.style.visibility = "hidden";
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
+          }
+        }
+        // var path = file.filePath;
+        // result.download(path);
+        //     }
+        // }
         //     <!-- }
         //
-            if(this.status == 500) {
-              console.log(ajax.responseText);
-            }
+        if (this.status == 500) {
+          console.log(ajax.responseText);
         }
+      }
 
-//           var download = function(uri, filename, callback){
-//           request.head(uri, function(err, res, body){
-//           console.log('content-type:', res.headers['content-type']);
-//           console.log('content-length:', res.headers['content-length']);
-//
-//           request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
-//           });
-//           };
-//           var filename= __dirname+ "/" + file.filePath;
-//           download(__dirname+ "/" + file.filePath, __dirname, function(){
-//             console.log('done');
-// });
-
-   };
+      //           var download = function(uri, filename, callback){
+      //           request.head(uri, function(err, res, body){
+      //           console.log('content-type:', res.headers['content-type']);
+      //           console.log('content-length:', res.headers['content-length']);
+      //
+      //           request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
+      //           });
+      //           };
+      //           var filename= __dirname+ "/" + file.filePath;
+      //           download(__dirname+ "/" + file.filePath, __dirname, function(){
+      //             console.log('done');
+      // });
+    };
 
     var formData = new FormData();
     formData.append("_id", _id);
@@ -579,7 +652,7 @@
     // const d1 = new DownloaderHelper(filePath,__dirname);
     // d1.on('end',() => console.log("download completed"))
     // d1.start()
-}
+  }
 
   function confirmDeleteFile(form) {
     console.log("function called");
