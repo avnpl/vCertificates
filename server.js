@@ -1532,5 +1532,9 @@ http.listen(3000, function () {
         });
       });
     });
+    app.get("/Logout", function(request, result) {
+      request.session.destroy();
+      result.redirect("/");
+    })
   });
 });
