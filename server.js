@@ -303,14 +303,12 @@ http.listen(3000, function () {
           });
 
         var fileUploaded = await recursiveGetFile(user.uploaded, _id);
-        //console.log("recursive file called");
         var fileShared = await recursiveGetSharedFile(user.sharedWithMe, _id);
-        //console.log("recursive shared file called");
 
         if (fileUploaded == null && fileShared == null) {
           result.json({
             status: "error",
-            message: "File is neither uploaded nor shared with you.",
+            message: "File is either not uploaded or not shared with you.",
           });
           return false;
         }
@@ -322,27 +320,31 @@ http.listen(3000, function () {
         var file = fileUploaded == null ? fileShared : fileUploaded;
         console.log(file);
 
-        // fileSystem.readFile(file.filePath, function(error, data) {
-        //   result.json({
-        //     "status": "success",
-        //     "message": "Data has been fetched.",
-        //     "arrayBuffer": data,
-        //     "fileType": file.type,
-        //     "fileName": file.name
-        //   });
-        //
-        // });
-        var filePath = __dirname + "/" + file.filePath;
-        result.sendFile(filePath);
-        console.log(filePath);
-      } else {
-        result.json({
-          status: "error",
-          message: "Please login to perform this action.",
+        fileSystem.readFile(file.filePath, function (error, data) {
+          result.json({
+            status: "success",
+            message: "Data has been fetched.",
+            arrayBuffer: data,
+            fileType: file.type,
+            fileName: file.name,
+          });
         });
+        //   var filePath = __dirname + "/" + file.filePath;
+        //   result.sendFile(filePath);
+        //   console.log(filePath);
+        // } else {
+        //   result.json({
+        //     status: "error",
+        //     message: "Please login to perform this action.",
+        //   });
 
         return false;
       }
+      result.json({
+        status: "error",
+        message: "Please login to perform this action.",
+      });
+      return false;
     });
 
     //delete shared file
@@ -1532,9 +1534,9 @@ http.listen(3000, function () {
         });
       });
     });
-    app.get("/Logout", function(request, result) {
+    app.get("/Logout", function (request, result) {
       request.session.destroy();
       result.redirect("/");
-    })
+    });
   });
 });

@@ -2,78 +2,89 @@
 <script src="<%= request.mainURL %>/public/js/popper.min.js"></script>
 <script src="<%= request.mainURL %>/public/js/bootstrap.min.js"></script>
 <script src="<%= request.mainURL %>/public/js/sweetalert.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js" integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF" crossorigin="anonymous"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+  integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+  crossorigin="anonymous"
+/>
+<script
+  src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+  integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+  crossorigin="anonymous"
+></script>
+<script
+  src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+  integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+  crossorigin="anonymous"
+></script>
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"
+  integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF"
+  crossorigin="anonymous"
+></script>
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
 <script>
-      function downloadFilee(self) {
-        var _id = self.getAttribute("data-id");
-        
-        self.innerHTML = "Loading...";
-        self.setAttribute("disabled", "disabled");
+  function downloadFile(self) {
+    var _id = self.getAttribute("data-id");
 
-        //var XMLHttpRequest = require(["xmlhttprequest"]).XMLHttpRequest;
-        var ajax = new XMLHttpRequest();
-        ajax.open("POST", document.getElementById("base-url").value + "/DownloadFile", true);
+    self.innerHTML = "Loading...";
+    self.setAttribute("disabled", "disabled");
 
-        ajax.onreadystatechange = function () {
-        if(this.readyState == 4) {
-            if(this.status == 200) {
-                var data = JSON.parse(this.responseText);
+    //var XMLHttpRequest = require(["xmlhttprequest"]).XMLHttpRequest;
+    var ajax = new XMLHttpRequest();
+    ajax.open(
+      "POST",
+      document.getElementById("base-url").value + "/DownloadFile",
+      true
+    );
 
-                self.removeAttribute("disabled");
-                self.innerHTML = "Download";
-                if(data.status =="error") {
-                    swal("Error", data.message, "error");
-                }
+    ajax.onreadystatechange = function () {
+      if (this.readyState == 4) {
+        if (this.status == 200) {
+          var data = JSON.parse(this.responseText);
 
-                if(data.status == "success") {
-                    //response will be a buffer array
-                    // convert that into base64 
-
-                   
-
-                    var binary = ' ';
-                    var bytes = new Uint8Array(data.arrayBuffer.data);
-                    
-                    var len = bytes.byteLength();
-                    
-                    
-                    for(var i=0;i<len;i++) {
-                    binary += String.fromCharCode( bytes[ i ] );
-                    }
-                    var base64 = window.btoa( binary );
-                    base64 = "data:" + data.fileType + ";base64," + base64;
-
-                    //download the file
-                    const fileName = data.fileName;
-                    const link = document.createElement('a');
-                    //browsers that support HTML5 download attribute 
-                    if(link.download !== undefined) {
-                      link.setAttribute("href", base64);
-                      link.setAttribute('download', fileName);
-                      link.style.visibility = 'hidden';
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                    }
-                }
+          self.removeAttribute("disabled");
+          self.innerHTML = "Download";
+          if (data.status == "error") {
+            swal("Error", data.message, "error");
+          }
+          if (data.status == "success") {
+            //response will be a buffer array
+            // convert that into base64
+            var binary = " ";
+            var bytes = new Uint8Array(data.arrayBuffer.data);
+            var len = bytes.byteLength;
+            for (var i = 0; i < len; i++) {
+              binary += String.fromCharCode(bytes[i]);
             }
+            var base64 = window.btoa(binary);
+            base64 = "data:" + data.fileType + ";base64," + base64;
 
-            if(this.status == 500) {
-              console.log(this.responseText);
+            //download the file
+            const fileName = data.fileName;
+            const link = document.createElement("a");
+            //browsers that support HTML5 download attribute
+            if (link.download !== undefined) {
+              link.setAttribute("href", base64);
+              link.setAttribute("download", fileName);
+              link.style.visibility = "hidden";
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
             }
+          }
         }
+
+        if (this.status == 500) {
+          console.log(this.responseText);
+        }
+      }
     };
 
     var formData = new FormData();
     formData.append("_id", _id);
     ajax.send(formData);
-}
+  }
 </script>
-
-</body>
-</html>

@@ -557,103 +557,115 @@
     });
   }
 
-  function downloadFile(self) {
-    var _id = self.getAttribute("data-id");
-    //
-    self.innerHTML = "Loading...";
-    self.setAttribute("disabled", "disabled");
+  // function downloadFileWTF(self) {
+  //   var _id = self.getAttribute("data-id");
+  //   //
+  //   self.innerHTML = "Loading...";
+  //   self.setAttribute("disabled", "disabled");
 
-    // var XMLHttpRequest = require(["xmlhttprequest"]).XMLHttpRequest;
-    var ajax = new XMLHttpRequest();
-    ajax.open(
-      "POST",
-      document.getElementById("base-url").value + "/DownloadFile",
-      true
-    );
+  //   // var XMLHttpRequest = require(["xmlhttprequest"]).XMLHttpRequest;
+  //   var ajax = new XMLHttpRequest();
+  //   ajax.open(
+  //     "POST",
+  //     document.getElementById("base-url").value + "/DownloadFile",
+  //     true
+  //   );
 
-    ajax.onreadystatechange = function () {
-      if (this.readyState == 4) {
-        if (this.status == 200) {
-          // var data = JSON.parse(this.responseText);
-          var data = ajax.responseText;
-          self.removeAttribute("disabled");
-          self.innerHTML = "Download";
+  //   ajax.onreadystatechange = function () {
+  //     if (this.readyState == 4) {
+  //       if (this.status == 200) {
+  //         // var data = JSON.parse(this.responseText);
+  //         var data = JSON.parse(responseText);
+  //         self.removeAttribute("disabled");
+  //         self.innerHTML = "Download";
+  //         console.log(typeof data);
 
-          var blob = new Blob([data], { type: "image/jpeg" }); // change the type accordingly
-          var url = window.URL.createObjectURL(blob);
-          var a = document.createElement("a");
-          a.href = url;
-          a.download = "filename.jpg";
-          document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
-          a.click();
-          a.remove();
+  //         function str2bfr(str) {
+  //           var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
+  //           var bufView = new Uint16Array(buf);
+  //           for (var i = 0, strLen = str.length; i < strLen; i++) {
+  //             bufView[i] = str.charCodeAt(i);
+  //           }
+  //           return buf;
+  //         }
 
-          if (data.status == "error") {
-            swal("Error", data.message, "error");
-          }
-          if (data.status == "success") {
-            //response will be a buffer array
-            // convert that into base64
+  //         var buf = str2bfr([data]);
 
-            var binary = " ";
-            var bytes = new Uint8Array(data.arrayBuffer.data);
+  //         var blob = new Blob(buf, { type: "image/pdf" }); // change the type accordingly
+  //         var url = window.URL.createObjectURL(blob);
+  //         var a = document.createElement("a");
+  //         a.href = url;
+  //         a.download = "filename.pdf";
+  //         document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+  //         a.click();
+  //         a.remove();
 
-            var len = bytes.byteLength();
+  //         if (data.status == "error") {
+  //           swal("Error", data.message, "error");
+  //         }
+  //         if (data.status == "success") {
+  //           //response will be a buffer array
+  //           // convert that into base64
 
-            for (var i = 0; i < len; i++) {
-              binary += String.fromCharCode(bytes[i]);
-            }
-            var base64 = window.btoa(binary);
-            base64 = "data:" + data.fileType + ";base64," + base64;
+  //           var binary = " ";
+  //           var bytes = new Uint8Array(data.arrayBuffer.data);
 
-            // download the file
-            const fileName = data.fileName;
-            const link = document.createElement("a");
-            //browsers that support HTML5 download attribute
-            if (link.download !== undefined) {
-              link.setAttribute("href", base64);
-              link.setAttribute("download", fileName);
-              link.style.visibility = "hidden";
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            }
-          }
-        }
-        // var path = file.filePath;
-        // result.download(path);
-        //     }
-        // }
-        //     <!-- }
-        //
-        if (this.status == 500) {
-          console.log(ajax.responseText);
-        }
-      }
+  //           var len = bytes.byteLength();
 
-      //           var download = function(uri, filename, callback){
-      //           request.head(uri, function(err, res, body){
-      //           console.log('content-type:', res.headers['content-type']);
-      //           console.log('content-length:', res.headers['content-length']);
-      //
-      //           request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
-      //           });
-      //           };
-      //           var filename= __dirname+ "/" + file.filePath;
-      //           download(__dirname+ "/" + file.filePath, __dirname, function(){
-      //             console.log('done');
-      // });
-    };
+  //           for (var i = 0; i < len; i++) {
+  //             binary += String.fromCharCode(bytes[i]);
+  //           }
+  //           var base64 = window.btoa(binary);
+  //           base64 = "data:" + data.fileType + ";base64," + base64;
 
-    var formData = new FormData();
-    formData.append("_id", _id);
-    ajax.send(formData);
-    // var filepath = document.getElementById("base-url").value + "/DownloadFile";
+  //           // download the file
+  //           const fileName = data.fileName;
+  //           const link = document.createElement("a");
+  //           //browsers that support HTML5 download attribute
+  //           if (link.download !== undefined) {
+  //             link.setAttribute("href", base64);
+  //             link.setAttribute("download", fileName);
+  //             link.style.visibility = "hidden";
+  //             document.body.appendChild(link);
+  //             link.click();
+  //             document.body.removeChild(link);
+  //           }
+  //         }
+  //       }
+  //       // var path = file.filePath;
+  //       // result.download(path);
+  //       //     }
+  //       // }
+  //       //     <!-- }
+  //       //
+  //       if (this.status == 500) {
+  //         console.log(ajax.responseText);
+  //       }
+  //     }
 
-    // const d1 = new DownloaderHelper(filePath,__dirname);
-    // d1.on('end',() => console.log("download completed"))
-    // d1.start()
-  }
+  //     //           var download = function(uri, filename, callback){
+  //     //           request.head(uri, function(err, res, body){
+  //     //           console.log('content-type:', res.headers['content-type']);
+  //     //           console.log('content-length:', res.headers['content-length']);
+  //     //
+  //     //           request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
+  //     //           });
+  //     //           };
+  //     //           var filename= __dirname+ "/" + file.filePath;
+  //     //           download(__dirname+ "/" + file.filePath, __dirname, function(){
+  //     //             console.log('done');
+  //     // });
+  //   };
+
+  //   var formData = new FormData();
+  //   formData.append("_id", _id);
+  //   ajax.send(formData);
+  //   // var filepath = document.getElementById("base-url").value + "/DownloadFile";
+
+  //   // const d1 = new DownloaderHelper(filePath,__dirname);
+  //   // d1.on('end',() => console.log("download completed"))
+  //   // d1.start()
+  // }
 
   function confirmDeleteFile(form) {
     console.log("function called");
